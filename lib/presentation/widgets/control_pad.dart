@@ -7,24 +7,27 @@ class ControlPad extends StatelessWidget {
   const ControlPad({super.key, required this.engine});
 
   Widget _btn(IconData icon, VoidCallback action) {
-    return GestureDetector(
-      onTap: action,
-      child: Container(
-        width: 56,
-        height: 56,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.grey.shade900,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(.6),
-              offset: const Offset(2, 2),
-              blurRadius: 3,
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: GestureDetector(
+        onTap: action,
+        child: Container(
+          width: 56,
+          height: 56,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.grey.shade900,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.6),
+                offset: const Offset(2, 2),
+                blurRadius: 3,
+              ),
+            ],
+          ),
+          child: Icon(icon),
         ),
-        child: Icon(icon),
       ),
     );
   }
@@ -45,12 +48,10 @@ class ControlPad extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _btn(Icons.arrow_back, () => engine.changeDirection(Direction.left)),
-              const SizedBox(width: 12),
-              _btn(Icons.pause, () {
-                if (engine.isGameOver) return;
-                engine.pause();
-              }),
-              const SizedBox(width: 12),
+              _btn(
+                engine.isPaused ? Icons.play_arrow : Icons.pause,
+                    () => engine.togglePause(),
+              ),
               _btn(Icons.arrow_forward, () => engine.changeDirection(Direction.right)),
             ],
           ),

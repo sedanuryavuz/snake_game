@@ -59,7 +59,10 @@ class _SnakePageState extends State<SnakePage> {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Skor: ${engine.score}", style: const TextStyle(fontSize: 20)),
+              Text(
+                "Skor: ${engine.isGameOver ? engine.lastScore : engine.score}",
+                style: const TextStyle(fontSize: 20),
+              ),
               const SizedBox(height: 8),
               GestureDetector(
                 onVerticalDragUpdate: _onVerticalDrag,

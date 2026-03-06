@@ -13,19 +13,51 @@ class SnakePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint();
+    if (snake.isEmpty) return;
+    
     final cellW = size.width / Grid.cols;
     final cellH = size.height / Grid.rows;
 
-    const padding = 2.0;
+    const padding = 1.0;
 
-    final gridPaint = Paint()..color = Colors.grey.shade900;
-    for (int r = 0; r < Grid.rows; r++) {
-      for (int c = 0; c < Grid.cols; c++) {
-        final rect = Rect.fromLTWH(c * cellW + .5, r * cellH + .5, cellW - 1, cellH - 1);
-        canvas.drawRect(rect, gridPaint);
-      }
+    final gridPaint = Paint()
+      ..color = const Color(0xFF1B1B22)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    for (int r = 0; r <= Grid.rows; r++) {
+      canvas.drawLine(Offset(0, r * cellH), Offset(size.width, r * cellH), gridPaint);
     }
+    for (int c = 0; c <= Grid.cols; c++) {
+      canvas.drawLine(Offset(c * cellW, 0), Offset(c * cellW, size.height), gridPaint);
+    }
+
+    final foodRect = Rect.fromLTWH(
+      food.x * cellW + padding * 2,
+      food.y * cellH + padding * 2,
+      cellW - padding * 4,
+      cellH - padding * 4,
+    );
+
+    final foodPaint = Paint()
+      ..color = Colors.redAccent
+      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 4);
+
+    final foodOutline = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    canvas.drawCircle(foodRect.center, foodRect.width / 2, foodPaint);
+    canvas.drawCircle(foodRect.center, foodRect.width / 2.5, foodOutline);
+
+    final bodyPaint = Paint()
+      ..color = Colors.green.withOpacity(0.9)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 2);
+
+    final headPaint = Paint()
+      ..color = Colors.greenAccent
+      ..maskFilter = const MaskFilter.blur(BlurStyle.solid, 4);
 
     for (int i = 0; i < snake.length; i++) {
       final p = snake[i];
@@ -36,36 +68,22 @@ class SnakePainter extends CustomPainter {
         cellH - padding * 2,
       );
 
-      final rr = RRect.fromRectAndRadius(rect, const Radius.circular(2));
-      paint.color = (i == 0) ? Colors.greenAccent : Colors.green;
+      final rrect = RRect.fromRectAndRadius(rect, Radius.circular(cellW * 0.3));
+      
+      if (i == 0) {
+        canvas.drawRRect(rrect, headPaint);
+         final shine = Rect.fromLTWH(
+          rect.left + rect.width * .2,
+          rect.top + rect.height * .2,
+          rect.width * .3,
+          rect.height * .3,
+        );
+        canvas.drawRect(shine, Paint()..color = Colors.white.withOpacity(0.8));
 
-      canvas.drawRRect(rr, paint);
-
-      final inner = rect.deflate(rect.width * .22);
-      paint.color = Colors.black.withOpacity(.12);
-      canvas.drawRect(inner, paint);
+      } else {
+        canvas.drawRRect(rrect, bodyPaint);
+      }
     }
-
-    final foodRect = Rect.fromLTWH(
-      food.x * cellW + padding,
-      food.y * cellH + padding,
-      cellW - padding * 2,
-      cellH - padding * 2,
-    );
-
-    paint.color = Colors.redAccent;
-    final rr = RRect.fromRectAndRadius(foodRect, const Radius.circular(3));
-    canvas.drawRRect(rr, paint);
-
-    final shine = Rect.fromLTWH(
-      foodRect.left + foodRect.width * .18,
-      foodRect.top + foodRect.height * .18,
-      foodRect.width * .3,
-      foodRect.height * .3,
-    );
-
-    paint.color = Colors.white.withOpacity(.6);
-    canvas.drawRect(shine, paint);
   }
 
   @override

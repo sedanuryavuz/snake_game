@@ -3,7 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:snake_game/core/constants/grid.dart';
 import '../enums/direction.dart';
-
+import '../enums/game_state.dart';
 
 class SnakeEngine {
   final Random _rnd = Random();
@@ -12,42 +12,53 @@ class SnakeEngine {
   late Point<int> food;
   late Direction direction;
 
-  bool isGameOver = false;
-  bool isPaused = false;
+  GameState state = GameState.gameOver;
 
   int score = 0;
   int lastScore = 0;
+  int highScore = 0;
   int speedMillis = 200;
 
   Timer? _timer;
 
   VoidCallback? onUpdate;
 
+  SnakeEngine() {
+    snake = [const Point(0, 0)];
+    food = const Point(5, 5);
+    direction = Direction.right;
+  }
+
+  bool get isGameOver => state == GameState.gameOver;
+  bool get isPaused => state == GameState.paused;
+  bool get isPlaying => state == GameState.playing;
+
   void startGame() {
     _timer?.cancel();
-    isGameOver = false;
-    isPaused = false;
-
+    
     speedMillis = 200;
-    lastScore = 0;
+    lastScore = score;
+    if (score > highScore) {
+      highScore = score;
+    }
     score = 0;
 
     snake = List.generate(
       Grid.initialSnakeLength,
-          (i) => Point(
-            Grid.initialSnakeLength - i - 1,
+      (i) => Point(
+        Grid.initialSnakeLength - i - 1,
         0,
       ),
     );
     direction = Direction.right;
-    score = 0;
-    isGameOver = false;
+    
     _placeFood();
 
-    _timer?.cancel();
+    state = GameState.playing;
+
     _timer = Timer.periodic(
       Duration(milliseconds: speedMillis),
-          (_) => _tick(),
+      (_) => _tick(),
     );
 
     onUpdate?.call();
@@ -69,7 +80,9 @@ class SnakeEngine {
   void changeDirection(Direction newDir) {
     if (isGameOver) return;
 
-    if (isPaused) togglePause();
+    if (isPaused) {
+      togglePause();
+    }
 
     if ((direction == Direction.left && newDir == Direction.right) ||
         (direction == Direction.right && newDir == Direction.left) ||
@@ -78,10 +91,11 @@ class SnakeEngine {
       return;
     }
     direction = newDir;
+    onUpdate?.call();
   }
 
   void _tick() {
-    if (isGameOver || isPaused) return;
+    if (!isPlaying) return;
 
     final head = snake.first;
     late Point<int> newHead;
@@ -125,7 +139,7 @@ class SnakeEngine {
         _timer?.cancel();
         _timer = Timer.periodic(
           Duration(milliseconds: speedMillis),
-              (_) => _tick(),
+          (_) => _tick(),
         );
       }
     } else {
@@ -135,26 +149,12 @@ class SnakeEngine {
     onUpdate?.call();
   }
 
-
-  void pause() {
-    _timer?.cancel();
-  }
-
-  void resume() {
-    if (!_timerIsActive) {
-      _timer = Timer.periodic(
-        Duration(milliseconds: speedMillis),
-            (_) => _tick(),
-      );
-    }
-  }
-
-  bool get _timerIsActive => _timer?.isActive ?? false;
-
   void _gameOver() {
     lastScore = score;
-    score = 0;
-    isGameOver = true;
+    if (score > highScore) {
+      highScore = score;
+    }
+    state = GameState.gameOver;
     _timer?.cancel();
     onUpdate?.call();
   }
@@ -166,15 +166,16 @@ class SnakeEngine {
   void togglePause() {
     if (isGameOver) return;
 
-    if(isPaused){
+    if (isPaused) {
+      state = GameState.playing;
       _timer?.cancel();
-      _timer = Timer.periodic(Duration(milliseconds: speedMillis),
-          (_) => _tick(),
+      _timer = Timer.periodic(
+        Duration(milliseconds: speedMillis),
+        (_) => _tick(),
       );
-      isPaused = false;
-    }else{
+    } else {
+      state = GameState.paused;
       _timer?.cancel();
-      isPaused = true;
     }
     onUpdate?.call();
   }

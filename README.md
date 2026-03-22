@@ -1,16 +1,98 @@
-# snake_game
+# Pixel Snake
 
-A new Flutter project.
+A small Flutter arcade game with a neon, retro-inspired presentation. The app renders a 20x20 snake board, supports swipe and on-screen controls, and manages score, pause, speed scaling, and game-over flow in a lightweight game engine.
+
+## Features
+
+- Custom-painted snake board with glowing snake and food effects
+- Swipe gestures on the board for directional input
+- On-screen control pad for tap-based play
+- Pause and resume support
+- Score, last score, and session high score tracking
+- Speed increases as the score grows
+
+## Tech Stack
+
+- Flutter
+- Dart
+- CustomPainter for board rendering
+- `Timer.periodic` game loop
+
+## Project Structure
+
+```text
+lib/
+  main.dart                         App entry point and theme setup
+  core/
+    constants/
+      grid.dart                     Board dimensions and initial snake length
+    enums/
+      direction.dart                Movement directions
+      game_state.dart               Playing / paused / game over states
+    logic/
+      snake_engine.dart             Core game loop and state transitions
+    painter/
+      snake_painter.dart            Snake, food, and grid rendering
+  presentation/
+    pages/
+      snake_page.dart               Main game screen and layout
+    widgets/
+      control_pad.dart              On-screen directional controls
+test/
+  widget_test.dart                  Default Flutter widget test placeholder
+```
+
+## How It Works
+
+`SnakeEngine` is the gameplay core. It owns the snake body, food position, direction, score, speed, and current game state. A periodic timer advances the snake, detects collisions, grows the body when food is eaten, and speeds the game up every 50 points.
+
+The UI lives in `presentation/`. `SnakePage` wires the engine into Flutter state updates, renders the score cards and overlays, and forwards user input from drag gestures and the control pad. `SnakePainter` draws the board frame-by-frame from the engine state.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Prerequisites
 
-A few resources to get you started if this is your first Flutter project:
+- Flutter SDK installed
+- A connected simulator, emulator, or device
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Install Dependencies
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter pub get
+```
+
+### Run the App
+
+```bash
+flutter run
+```
+
+### Run Static Analysis
+
+```bash
+flutter analyze
+```
+
+### Run Tests
+
+```bash
+flutter test
+```
+
+## Controls
+
+- Swipe up, down, left, or right on the game board
+- Or tap the on-screen directional pad
+- Use the app bar pause button to pause or resume
+- When the game ends, tap `PLAY AGAIN` to restart
+
+## Gameplay Rules
+
+- The snake starts moving automatically
+- Eating food increases the score by 10
+- The snake speeds up every 50 points
+- Hitting a wall ends the run
+- Running into the snake body also ends the run
+- Direct reversal is blocked, so left cannot immediately become right, and up cannot immediately become down
+
+## Screenshots
